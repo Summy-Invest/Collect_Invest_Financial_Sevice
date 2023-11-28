@@ -1,4 +1,4 @@
-package invest.collect.com.plugins
+package invest.collect.com.routes
 
 import io.ktor.server.application.*
 import io.ktor.server.routing.*

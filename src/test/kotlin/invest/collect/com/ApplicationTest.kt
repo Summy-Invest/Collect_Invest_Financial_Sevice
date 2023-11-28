@@ -1,6 +1,6 @@
 package invest.collect.com
 
-import invest.collect.com.plugins.*
+import invest.collect.com.routes.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
