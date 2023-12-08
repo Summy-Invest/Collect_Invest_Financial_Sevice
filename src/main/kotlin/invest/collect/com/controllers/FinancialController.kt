@@ -23,17 +23,13 @@ class FinancialController {
             }
         }
     }
-    private suspend fun withdrawBalance(url: String, transaction: Transaction){
+    private suspend fun withdrawBalance(url: String, userId: Long, amount: Int){
         HttpClientFactory.createHttpClient().use { client ->
-            val userId = transaction.id
-            val wallet = getWallet(userId!!, "http://localhost:8080")
-            if (wallet.balance < transaction.amount!!){
+            val wallet = getWallet(userId, "http://localhost:8080")
+            if (wallet.balance < amount){
                 throw IllegalArgumentException("Not enough money in wallet")
             }
-            val response: HttpResponse = client.put("$url/financialService/wallet/withdrawBalance/"){
-                contentType(ContentType.Application.Json)
-                setBody(transaction)
-            }
+            val response: HttpResponse = client.put("$url/financialService/wallet/withdrawBalance/$userId/$amount")
             when (response.status){
                 HttpStatusCode.OK -> {
                     return
@@ -101,7 +97,7 @@ class FinancialController {
     suspend fun buyCollectible(url: String, purchase: Transaction): Transaction{
         val transactionId = createTransaction(url, purchase)
         try {
-            withdrawBalance(url, purchase)
+            withdrawBalance(url, purchase.id!!, purchase.amount!!)
         }
         catch (e: IllegalArgumentException){
             val status = Transaction(id = transactionId, status = "not enough money")
