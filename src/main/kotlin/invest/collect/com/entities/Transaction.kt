@@ -4,6 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Transaction(
-    val userId: Long,
-    val amount: Int
+    val id: Long? = null,
+    val amount: Int? = null,
+    val status: String? = null,
+    val walletId: Long? = null
 )

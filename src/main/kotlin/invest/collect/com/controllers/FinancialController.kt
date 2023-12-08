@@ -18,16 +18,16 @@ class FinancialController {
                 }
 
                 else -> {
-                    throw Exception("Error while updating balance")
+                    throw Exception("Error while receiving wallet")
                 }
             }
         }
     }
     private suspend fun withdrawBalance(url: String, transaction: Transaction){
         HttpClientFactory.createHttpClient().use { client ->
-            val userId = transaction.userId;
-            val wallet = getWallet(userId, "http://localhost:8080");
-            if (wallet.balance < transaction.amount){
+            val userId = transaction.id
+            val wallet = getWallet(userId!!, "http://localhost:8080")
+            if (wallet.balance < transaction.amount!!){
                 throw IllegalArgumentException("Not enough money in wallet")
             }
             val response: HttpResponse = client.put("$url/financialService/wallet/withdrawBalance/"){
@@ -64,9 +64,9 @@ class FinancialController {
     }
     private suspend fun createTransaction(url: String, transaction: Transaction): Long{
         HttpClientFactory.createHttpClient().use { client ->
-            val userId = transaction.userId;
-            val walletId = getWallet(userId, "http://localhost:8080").id;
-            val newTransaction = Transaction(walletId, transaction.amount);
+            val userId = transaction.id;
+            val walletId = getWallet(userId!!, "http://localhost:8080").id;
+            val newTransaction = Transaction(walletId = walletId, amount = transaction.amount);
             val response: HttpResponse = client.post("$url/financialService/transaction/createTransaction/"){
                 contentType(ContentType.Application.Json)
                 setBody(newTransaction)
@@ -83,7 +83,7 @@ class FinancialController {
         }
     }
 
-    private suspend fun updateStatus(url: String, status: Status){
+    private suspend fun updateStatus(url: String, status: Transaction){
         HttpClientFactory.createHttpClient().use { client ->
             val response: HttpResponse = client.put("$url/financialService/transaction/updateStatus/"){
                 contentType(ContentType.Application.Json)
@@ -101,17 +101,17 @@ class FinancialController {
         }
     }
 
-    suspend fun buyCollectible(url: String, purchase: Transaction): Status{
+    suspend fun buyCollectible(url: String, purchase: Transaction): Transaction{
         val transactionId = createTransaction(url, purchase)
         try {
             withdrawBalance(url, purchase)
         }
         catch (e: IllegalArgumentException){
-            val status = Status(transactionId, "not enough money")
+            val status = Transaction(id = transactionId, status = "not enough money")
             updateStatus(url, status)
             return status
         }
-        val status = Status(transactionId, "success")
+        val status = Transaction(id = transactionId, status = "success")
         updateStatus(url, status)
         return status
     }
