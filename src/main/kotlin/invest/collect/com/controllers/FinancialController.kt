@@ -45,12 +45,9 @@ class FinancialController {
             }
         }
     }
-    suspend fun topUp(url: String, transaction: Transaction) {
+    suspend fun topUp(url: String, userId: Long, amount: Int) {
         HttpClientFactory.createHttpClient().use { client ->
-            val response: HttpResponse = client.put("$url/financialService/wallet/topUpBalance/"){
-                contentType(ContentType.Application.Json)
-                setBody(transaction)
-            }
+            val response: HttpResponse = client.put("$url/financialService/wallet/topUpBalance/$userId/$amount")
             when (response.status){
                 HttpStatusCode.OK -> {
                     return

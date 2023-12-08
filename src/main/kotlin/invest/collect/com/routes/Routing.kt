@@ -17,11 +17,12 @@ fun Application.configureRouting() {
     val url = "http://localhost:8080"
 
     routing {
-        put("/topUp") {
-            val transaction = call.receive<Transaction>()
+        put("/topUp/{userId}/{amount}") {
+            val userId: Long = call.parameters["userId"]!!.toLong()
+            val amount: Int = call.parameters["amount"]!!.toInt()
             try {
-                walletController.topUp(url, transaction)
-                call.respond(HttpStatusCode.OK, "${transaction.amount}")
+                walletController.topUp(url, userId, amount)
+                call.respond(HttpStatusCode.OK, "$amount")
             }
             catch (e: Throwable) {
                 call.respondText(text = Json.encodeToString(Message("Error while updating balance")),
