@@ -62,13 +62,14 @@ class FinancialController {
         HttpClientFactory.createHttpClient().use { client ->
             val walletId = getWallet(userId, "http://localhost:8080").id
             val newTransaction = Transaction(walletId = walletId, amount = amount)
-            val response: HttpResponse = client.post("$url/financialService/transaction/createTransaction/"){
+            val response: HttpResponse = client.post("$url/financialService/transaction/createTransaction"){
                 contentType(ContentType.Application.Json)
                 setBody(newTransaction)
             }
             when (response.status){
                 HttpStatusCode.OK -> {
-                    return response.body<Long>()
+                    val res = response.body<Map<String, Long>>()
+                    return res["id"]!!
                 }
 
                 else -> {
@@ -80,7 +81,7 @@ class FinancialController {
 
     private suspend fun updateStatus(url: String, status: Status){
         HttpClientFactory.createHttpClient().use { client ->
-            val response: HttpResponse = client.patch("$url/financialService/transaction/updateStatus/"){
+            val response: HttpResponse = client.patch("$url/financialService/transaction/updateStatus"){
                 contentType(ContentType.Application.Json)
                 setBody(status)
             }
@@ -97,12 +98,27 @@ class FinancialController {
     }
 
     suspend fun buyCollectible(url: String, userId: Long, amount: Int): Status{
-        val transactionId = createTransaction(url, userId, amount)
+        val transactionId = createTransaction(url, userId, 0 - amount)
         try {
             withdrawBalance(url, userId, amount)
         }
         catch (e: IllegalArgumentException){
             val status = Status(id = transactionId, status = "not enough money")
+            updateStatus(url, status)
+            return status
+        }
+        val status = Status(id = transactionId, status = "success")
+        updateStatus(url, status)
+        return status
+    }
+
+    suspend fun sellCollectible(url: String, userId: Long, amount: Int): Status {
+        val transactionId = createTransaction(url, userId, amount)
+        try {
+            topUp(url, userId, amount)
+        }
+        catch (e: Throwable){
+            val status = Status(id = transactionId, status = "operation dropped")
             updateStatus(url, status)
             return status
         }
