@@ -55,11 +55,10 @@ class FinancialController {
             }
         }
     }
-    private suspend fun createTransaction(url: String, transaction: Transaction): Long{
+    private suspend fun createTransaction(url: String, userId: Long, amount: Int): Long{
         HttpClientFactory.createHttpClient().use { client ->
-            val userId = transaction.id;
-            val walletId = getWallet(userId!!, "http://localhost:8080").id;
-            val newTransaction = Transaction(walletId = walletId, amount = transaction.amount);
+            val walletId = getWallet(userId, "http://localhost:8080").id;
+            val newTransaction = Transaction(walletId = walletId, amount = amount);
             val response: HttpResponse = client.post("$url/financialService/transaction/createTransaction/"){
                 contentType(ContentType.Application.Json)
                 setBody(newTransaction)
@@ -94,10 +93,10 @@ class FinancialController {
         }
     }
 
-    suspend fun buyCollectible(url: String, purchase: Transaction): Transaction{
-        val transactionId = createTransaction(url, purchase)
+    suspend fun buyCollectible(url: String, userId: Long, amount: Int): Transaction{
+        val transactionId = createTransaction(url, userId, amount)
         try {
-            withdrawBalance(url, purchase.id!!, purchase.amount!!)
+            withdrawBalance(url, userId, amount)
         }
         catch (e: IllegalArgumentException){
             val status = Transaction(id = transactionId, status = "not enough money")

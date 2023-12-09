@@ -31,9 +31,10 @@ fun Application.configureRouting() {
                 )
             }
         }
-        post("/buy") {
-            val transaction = call.receive<Transaction>()
-            val status = walletController.buyCollectible(url, transaction)
+        post("/buy/{userId}/{amount}") {
+            val userId: Long = call.parameters["userId"]!!.toLong()
+            val amount: Int = call.parameters["amount"]!!.toInt()
+            val status = walletController.buyCollectible(url, userId, amount)
             call.respond(status)
         }
     }
