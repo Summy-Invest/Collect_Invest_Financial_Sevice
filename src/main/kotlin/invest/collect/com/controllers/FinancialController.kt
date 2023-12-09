@@ -61,14 +61,14 @@ class FinancialController {
     private suspend fun createTransaction(url: String, userId: Long, amount: Int): Long{
         HttpClientFactory.createHttpClient().use { client ->
             val walletId = getWallet(userId, "http://localhost:8080").id
-            val newTransaction = Transaction(walletId = walletId, amount = amount)
-            val response: HttpResponse = client.post("$url/financialService/transaction/createTransaction/"){
+            val newTransaction = Transaction(amount = amount, walletId = walletId)
+            val response: HttpResponse = client.post("$url/financialService/transaction/createTransaction"){
                 contentType(ContentType.Application.Json)
                 setBody(newTransaction)
             }
             when (response.status){
                 HttpStatusCode.OK -> {
-                    return response.body<Long>()
+                    return response.body<TransactionId>().id
                 }
 
                 else -> {
@@ -80,7 +80,7 @@ class FinancialController {
 
     private suspend fun updateStatus(url: String, status: Status){
         HttpClientFactory.createHttpClient().use { client ->
-            val response: HttpResponse = client.patch("$url/financialService/transaction/updateStatus/"){
+            val response: HttpResponse = client.patch("$url/financialService/transaction/updateStatus"){
                 contentType(ContentType.Application.Json)
                 setBody(status)
             }
