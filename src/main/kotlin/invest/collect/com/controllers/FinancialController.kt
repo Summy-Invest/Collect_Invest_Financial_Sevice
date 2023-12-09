@@ -57,19 +57,19 @@ class FinancialController {
     }
     private suspend fun createTransaction(url: String, userId: Long, amount: Int): Long{
         HttpClientFactory.createHttpClient().use { client ->
-            val walletId = getWallet(userId, "http://localhost:8080").id;
-            val newTransaction = Transaction(walletId = walletId, amount = amount);
+            val walletId = getWallet(userId, "http://localhost:8080").id
+            val newTransaction = Transaction(walletId = walletId, amount = amount)
             val response: HttpResponse = client.post("$url/financialService/transaction/createTransaction/"){
                 contentType(ContentType.Application.Json)
                 setBody(newTransaction)
             }
             when (response.status){
                 HttpStatusCode.OK -> {
-                    return response.body<Long>();
+                    return response.body<Long>()
                 }
 
                 else -> {
-                    throw Exception("Error while updating balance")
+                    throw Exception("Error while creating transaction")
                 }
             }
         }
@@ -77,7 +77,7 @@ class FinancialController {
 
     private suspend fun updateStatus(url: String, status: Transaction){
         HttpClientFactory.createHttpClient().use { client ->
-            val response: HttpResponse = client.put("$url/financialService/transaction/updateStatus/"){
+            val response: HttpResponse = client.patch("$url/financialService/transaction/updateStatus/"){
                 contentType(ContentType.Application.Json)
                 setBody(status)
             }
@@ -87,7 +87,7 @@ class FinancialController {
                 }
 
                 else -> {
-                    throw Exception("Error while updating balance")
+                    throw Exception("Error while updating status")
                 }
             }
         }

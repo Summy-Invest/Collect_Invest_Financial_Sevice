@@ -4,8 +4,49 @@ info:
   description: "Collect_Invest_Financial_Sevice API"
   version: "1.0.0"
 servers:
-- url: "https://localhost:8080"
+- url: "https://Collect_Invest_Financial_Sevice"
 paths:
+  /buy:
+    post:
+      description: ""
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: "#/components/schemas/Transaction"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Transaction"
+  /topUp/{userId}/{amount}:
+    put:
+      description: ""
+      parameters:
+      - name: "userId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "amount"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "string"
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
   /ws:
     get:
       description: ""
@@ -44,40 +85,19 @@ paths:
               required: true
               schema:
                 type: "string"
-  /topUp:
-    put:
-      description: ""
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: "#/components/schemas/Transaction"
-        required: true
-      responses:
-        "200":
-          description: "OK"
-          content:
-            'application/json':
-              schema:
-                type: "integer"
-                format: "int32"
-        "400":
-          description: "Bad Request"
-          content:
-            'application/json':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "Error while updating balance"
 components:
   schemas:
     Transaction:
       type: "object"
       properties:
-        userId:
+        id:
           type: "integer"
           format: "int64"
-        moneyAmount:
+        amount:
           type: "integer"
           format: "int32"
+        status:
+          type: "string"
+        walletId:
+          type: "integer"
+          format: "int64"
