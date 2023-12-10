@@ -9,7 +9,7 @@ import io.ktor.http.*
 import java.lang.Exception
 
 class FinancialController {
-    private suspend fun getWallet(userId: Long, url: String): Wallet {
+    suspend fun getWallet(userId: Long, url: String): Wallet {
         HttpClientFactory.createHttpClient().use { client ->
             val response: HttpResponse = client.get("$url/financialService/wallet/getWallet/$userId")
             when (response.status){

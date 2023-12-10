@@ -3,6 +3,7 @@ package invest.collect.com.routes
 import invest.collect.com.controllers.FinancialController
 import invest.collect.com.entities.Message
 import invest.collect.com.entities.Transaction
+import invest.collect.com.entities.Wallet
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -31,6 +32,7 @@ fun Application.configureRouting() {
                 )
             }
         }
+
         post("/buy/{userId}/{amount}") {
             val userId: Long = call.parameters["userId"]!!.toLong()
             val amount: Int = call.parameters["amount"]!!.toInt()
@@ -43,6 +45,20 @@ fun Application.configureRouting() {
             val amount: Int = call.parameters["amount"]!!.toInt()
             val status = walletController.sellCollectible(url, userId, amount)
             call.respond(status)
+        }
+
+        get("/getWallet/{userId}") {
+            val userId: Long = call.parameters["userId"]!!.toLong()
+            try{
+                val wallet: Wallet = walletController.getWallet(userId, url)
+                call.respond(wallet)
+            }
+            catch (e: Throwable) {
+                call.respondText(text = Json.encodeToString(Message("Error while getting balance")),
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.BadRequest
+                )
+            }
         }
     }
 }
