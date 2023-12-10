@@ -97,12 +97,27 @@ class FinancialController {
     }
 
     suspend fun buyCollectible(url: String, userId: Long, amount: Int): Status{
-        val transactionId = createTransaction(url, userId, amount)
+        val transactionId = createTransaction(url, userId, 0 - amount)
         try {
             withdrawBalance(url, userId, amount)
         }
         catch (e: IllegalArgumentException){
             val status = Status(id = transactionId, status = "not enough money")
+            updateStatus(url, status)
+            return status
+        }
+        val status = Status(id = transactionId, status = "success")
+        updateStatus(url, status)
+        return status
+    }
+
+    suspend fun sellCollectible(url: String, userId: Long, amount: Int): Status {
+        val transactionId = createTransaction(url, userId, amount)
+        try {
+            topUp(url, userId, amount)
+        }
+        catch (e: Throwable){
+            val status = Status(id = transactionId, status = "operation dropped")
             updateStatus(url, status)
             return status
         }

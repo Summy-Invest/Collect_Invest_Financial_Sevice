@@ -27,7 +27,7 @@ fun Application.configureRouting() {
             catch (e: Throwable) {
                 call.respondText(text = Json.encodeToString(Message("Error while updating balance")),
                     contentType = ContentType.Application.Json,
-                    status = HttpStatusCode.OK
+                    status = HttpStatusCode.BadRequest
                 )
             }
         }
@@ -35,6 +35,13 @@ fun Application.configureRouting() {
             val userId: Long = call.parameters["userId"]!!.toLong()
             val amount: Int = call.parameters["amount"]!!.toInt()
             val status = walletController.buyCollectible(url, userId, amount)
+            call.respond(status)
+        }
+
+        post("/sell/{userId}/{amount}") {
+            val userId: Long = call.parameters["userId"]!!.toLong()
+            val amount: Int = call.parameters["amount"]!!.toInt()
+            val status = walletController.sellCollectible(url, userId, amount)
             call.respond(status)
         }
     }
