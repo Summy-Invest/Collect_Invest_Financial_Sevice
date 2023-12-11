@@ -6,9 +6,9 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 
-object HttpClientFactory {
-    fun createHttpClient(): HttpClient {
-        return HttpClient(CIO){
+object HttpClientSingleton {
+    val client: HttpClient by lazy {
+        HttpClient(CIO){
             install(ContentNegotiation) {
                 json(contentType = ContentType.Any)
             }

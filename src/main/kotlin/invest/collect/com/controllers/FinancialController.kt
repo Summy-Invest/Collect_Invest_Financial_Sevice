@@ -1,7 +1,7 @@
 package invest.collect.com.controllers
 
 import invest.collect.com.entities.*
-import invest.collect.com.utils.HttpClientFactory
+import invest.collect.com.utils.HttpClientSingleton
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -21,16 +21,15 @@ class FinancialController {
      * @throws Exception if there is an error while receiving the wallet.
      */
     suspend fun getWallet(userId: Long, url: String): Wallet {
-        HttpClientFactory.createHttpClient().use { client ->
-            val response: HttpResponse = client.get("$url/financialService/wallet/getWallet/$userId")
-            when (response.status){
-                HttpStatusCode.OK -> {
-                    return response.body<Wallet>()
-                }
+        val client = HttpClientSingleton.client
+        val response: HttpResponse = client.get("$url/financialService/wallet/getWallet/$userId")
+        when (response.status){
+            HttpStatusCode.OK -> {
+                return response.body<Wallet>()
+            }
 
-                else -> {
-                    throw Exception("Error while receiving wallet")
-                }
+            else -> {
+                throw Exception("Error while receiving wallet")
             }
         }
     }
@@ -45,20 +44,19 @@ class FinancialController {
      * @throws Exception if there is an error while updating the balance.
      */
     private suspend fun withdrawBalance(url: String, userId: Long, amount: Double){
-        HttpClientFactory.createHttpClient().use { client ->
-            val wallet = getWallet(userId, url)
-            if (wallet.balance < amount){
-                throw IllegalArgumentException("Not enough money in wallet")
+        val client = HttpClientSingleton.client
+        val wallet = getWallet(userId, url)
+        if (wallet.balance < amount){
+            throw IllegalArgumentException("Not enough money in wallet")
+        }
+        val response: HttpResponse = client.put("$url/financialService/wallet/withdrawBalance/$userId/$amount")
+        when (response.status){
+            HttpStatusCode.OK -> {
+                return
             }
-            val response: HttpResponse = client.put("$url/financialService/wallet/withdrawBalance/$userId/$amount")
-            when (response.status){
-                HttpStatusCode.OK -> {
-                    return
-                }
 
-                else -> {
-                    throw Exception("Error while updating balance")
-                }
+            else -> {
+                throw Exception("Error while updating balance")
             }
         }
     }
@@ -71,16 +69,15 @@ class FinancialController {
      * @param amount The amount to top up.
      */
     suspend fun topUp(url: String, userId: Long, amount: Double) {
-        HttpClientFactory.createHttpClient().use { client ->
-            val response: HttpResponse = client.put("$url/financialService/wallet/topUpBalance/$userId/$amount")
-            when (response.status){
-                HttpStatusCode.OK -> {
-                    return
-                }
+        val client = HttpClientSingleton.client
+        val response: HttpResponse = client.put("$url/financialService/wallet/topUpBalance/$userId/$amount")
+        when (response.status){
+            HttpStatusCode.OK -> {
+                return
+            }
 
-                else -> {
-                    throw Exception("Error while updating balance")
-                }
+            else -> {
+                throw Exception("Error while updating balance")
             }
         }
     }
@@ -95,21 +92,20 @@ class FinancialController {
      * @throws Exception if there is an error while creating the transaction.
      */
     private suspend fun createTransaction(url: String, userId: Long, amount: Double): Long{
-        HttpClientFactory.createHttpClient().use { client ->
-            val walletId = getWallet(userId, "http://localhost:8080").id
-            val newTransaction = Transaction(amount = amount, walletId = walletId)
-            val response: HttpResponse = client.post("$url/financialService/transaction/createTransaction"){
-                contentType(ContentType.Application.Json)
-                setBody(newTransaction)
+        val client = HttpClientSingleton.client
+        val walletId = getWallet(userId, "http://localhost:8080").id
+        val newTransaction = Transaction(amount = amount, walletId = walletId)
+        val response: HttpResponse = client.post("$url/financialService/transaction/createTransaction"){
+            contentType(ContentType.Application.Json)
+            setBody(newTransaction)
+        }
+        when (response.status){
+            HttpStatusCode.OK -> {
+                return response.body<TransactionId>().id
             }
-            when (response.status){
-                HttpStatusCode.OK -> {
-                    return response.body<TransactionId>().id
-                }
 
-                else -> {
-                    throw Exception("Error while creating transaction ${response.status}")
-                }
+            else -> {
+                throw Exception("Error while creating transaction ${response.status}")
             }
         }
     }
@@ -122,19 +118,18 @@ class FinancialController {
      * @throws Exception if there is an error while updating the status.
      */
     private suspend fun updateStatus(url: String, status: Status){
-        HttpClientFactory.createHttpClient().use { client ->
-            val response: HttpResponse = client.patch("$url/financialService/transaction/updateStatus"){
-                contentType(ContentType.Application.Json)
-                setBody(status)
+        val client = HttpClientSingleton.client
+        val response: HttpResponse = client.patch("$url/financialService/transaction/updateStatus"){
+            contentType(ContentType.Application.Json)
+            setBody(status)
+        }
+        when (response.status){
+            HttpStatusCode.OK -> {
+                return
             }
-            when (response.status){
-                HttpStatusCode.OK -> {
-                    return
-                }
 
-                else -> {
-                    throw Exception("Error while updating status")
-                }
+            else -> {
+                throw Exception("Error while updating status")
             }
         }
     }
