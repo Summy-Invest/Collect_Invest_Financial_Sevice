@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 data class Wallet(
     val id: Long,
     val userId: Long,
-    val balance: Int,
+    val balance: Double,
     val status: String,
 )

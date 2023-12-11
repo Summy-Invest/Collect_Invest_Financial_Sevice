@@ -10,12 +10,14 @@ import io.ktor.server.routing.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+
 fun Application.configureRouting() {
 
     val walletController = FinancialController()
     val url = "http://localhost:8080"
 
     routing {
+
         put("/topUp/{userId}/{amount}") {
             val userId: Long = call.parameters["userId"]!!.toLong()
             val amount: Double = call.parameters["amount"]!!.toDouble()

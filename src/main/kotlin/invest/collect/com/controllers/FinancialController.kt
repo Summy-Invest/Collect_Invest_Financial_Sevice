@@ -98,7 +98,7 @@ class FinancialController {
         HttpClientFactory.createHttpClient().use { client ->
             val walletId = getWallet(userId, "http://localhost:8080").id
             val newTransaction = Transaction(amount = amount, walletId = walletId)
-            val response: HttpResponse = client.patch("$url/financialService/transaction/createTransaction"){
+            val response: HttpResponse = client.post("$url/financialService/transaction/createTransaction"){
                 contentType(ContentType.Application.Json)
                 setBody(newTransaction)
             }
@@ -108,7 +108,7 @@ class FinancialController {
                 }
 
                 else -> {
-                    throw Exception("Error while creating transaction")
+                    throw Exception("Error while creating transaction ${response.status}")
                 }
             }
         }
