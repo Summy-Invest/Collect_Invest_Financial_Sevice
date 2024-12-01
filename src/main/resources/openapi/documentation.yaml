@@ -4,7 +4,7 @@ info:
   description: "Collect_Invest_Financial_Sevice API"
   version: "1.0.0"
 servers:
-- url: "https://localhost:7777"
+- url: "http://localhost:7777"
 paths:
   /buy/{userId}/{amount}:
     post:
