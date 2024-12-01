@@ -14,7 +14,7 @@ import kotlinx.serialization.json.Json
 fun Application.configureRouting() {
 
     val walletController = FinancialController()
-    val url = "http://localhost:8080"
+    val url = "http://db-service:8080"
 
     routing {
 
